@@ -7,6 +7,10 @@ from django.contrib.auth import authenticate, login, logout
 # Create your views here.
 
 class RegisterAccountView(View):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home:home')
+        return super().dispatch(request, *args, **kwargs)
     def get(self, request):
         form = UserRegisterForm()
         return render(request, 'account/register.html', {'form': form})
@@ -23,10 +27,14 @@ class RegisterAccountView(View):
 class LoginAccountView(View):
     form_class = UserLoginForm
     template_name = 'account/login.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home:home')
+        return super().dispatch(request, *args, **kwargs)
     def get(self, request):
         form = self.form_class
         return render(request, self.template_name, {'form':form})
-
     def post(self, request):
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -40,9 +48,7 @@ class LoginAccountView(View):
 
         return render(request, self.template_name, {'form': form})
 
-
 class LogoutAccountView(View):
-
     def get(self,request):
         logout(request)
         messages.success(request, 'you logout successfully', 'success')
